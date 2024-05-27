@@ -12,25 +12,29 @@ def soldiers_probability_success_bfs(
         destination_point:int # ponto de destino de cada soldado
     ) -> float:
 
-    shooters = [0] * (N + 1)
-    for position in shooter_positions:
-        shooters[position] += 1
+    # numeros de atirados em cada um dos pontos estratégicos
+    shooter_count = [0] * (N + 1)
+    for position in shooter_positions: # conta a partir da posição
+        shooter_count[position] += 1
 
     probability_success = [0.0] * (N + 1)
-    probability_success[starting_point] = math.pow(P,shooters[starting_point])
+    probability_success[starting_point] = math.pow(P,shooter_count[starting_point]) # probabilidade de sucesso do ponto de partida é a probabilidade de matar os atiradores presentes naquele ponto
 
+    # fila para bfs
     queue = [(starting_point, K)]
 
+    # probabilidades de sucesso em cada ponto estratégico
     while queue:
         current_point, bullets = queue.pop(0)
         for neighbor in roads[current_point]:
             if bullets > 0:
-                neighbor_probability = probability_success[current_point] * math.pow(P,shooters[neighbor])
+                # probabilidade de sucesso para ir até o vizinho atual
+                neighbor_probability = probability_success[current_point] * math.pow(P,shooter_count[neighbor])
                 if neighbor_probability > probability_success[neighbor]:
                     probability_success[neighbor] = neighbor_probability
-                    queue.append((neighbor,bullets - 1))
+                    queue.append((neighbor,bullets - 1)) # explora os vizinhos, já que conseguiu diminui balas
 
-    return probability_success[destination_point]
+    return probability_success[len(probability_success) -1]
 
 def run():
     input = sys.stdin.read
@@ -59,7 +63,8 @@ def run():
 
         # Lê o número de atiradores e suas posições
         A = int(data[index].split()[0])
-        shooter_positions = list(map(int, data[index].split()[1:]))
+        shooter_positions = list(map(int, data[index].split()[1:A+1]))
+
         index += 1
 
         # Lê o ponto de partida e destino
@@ -76,7 +81,7 @@ def run():
             destination_point=destination_point
         )
 
-        # resultado com três casas decimais
+        # O problema pede que a probabilidade seja mostrada com 3 casas decimais
         print("{:.3f}".format(probability_success_value))
 
 if __name__ == "__main__":
