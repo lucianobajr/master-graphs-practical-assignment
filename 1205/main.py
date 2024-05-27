@@ -1,6 +1,8 @@
 import sys
-import math
 from collections import defaultdict
+import heapq
+
+INF = float('inf')
 
 def soldiers_probability_success_bfs(
         N:int, # números de pontos estratégicos
@@ -12,29 +14,45 @@ def soldiers_probability_success_bfs(
         destination_point:int # ponto de destino de cada soldado
     ) -> float:
 
-    # numeros de atirados em cada um dos pontos estratégicos
+    # Inicializa o contador de atiradores em cada ponto estratégico
     shooter_count = [0] * (N + 1)
-    for position in shooter_positions: # conta a partir da posição
+    for position in shooter_positions:
         shooter_count[position] += 1
 
+    # Inicializa aa com a probabilidade acumulada de sucesso para cada ponto
+    probability_multiplier = [1.0] * (N + 1)
+    for i in range(1, N + 1):
+        for _ in range(shooter_count[i]):
+            probability_multiplier[i] *= P
+
+    # Inicializa a fila de prioridade e a probabilidade de sucesso do ponto de partida
+    pq = [(-probability_multiplier[starting_point], starting_point, K - shooter_count[starting_point])]  # Usamos valores negativos para criar uma max-heap
     probability_success = [0.0] * (N + 1)
-    probability_success[starting_point] = math.pow(P,shooter_count[starting_point]) # probabilidade de sucesso do ponto de partida é a probabilidade de matar os atiradores presentes naquele ponto
+    probability_success[starting_point] = probability_multiplier[starting_point]
 
-    # fila para bfs
-    queue = [(starting_point, K)]
+    while pq:
+        probability, u, bullets = heapq.heappop(pq)
+        probability = -probability  # Convertendo de volta para positivo
 
-    # probabilidades de sucesso em cada ponto estratégico
-    while queue:
-        current_point, bullets = queue.pop(0)
-        for neighbor in roads[current_point]:
-            if bullets > 0:
-                # probabilidade de sucesso para ir até o vizinho atual
-                neighbor_probability = probability_success[current_point] * math.pow(P,shooter_count[neighbor])
-                if neighbor_probability > probability_success[neighbor]:
-                    probability_success[neighbor] = neighbor_probability
-                    queue.append((neighbor,bullets - 1)) # explora os vizinhos, já que conseguiu diminui balas
+        # chegou ao ponto de destino
+        if u == destination_point:
+            return probability
+        
+        if probability < probability_success[u]:
+            continue
+        
+        # olhando os vizinhos do ponto atual
+        for v in roads[u]:
+            if bullets - shooter_count[v] < 0:
+                continue
+            
+            # probabilidade ao ir para o ponto vizinho
+            new_prob = probability * probability_multiplier[v]
+            if new_prob > probability_success[v]:
+                probability_success[v] = new_prob
+                heapq.heappush(pq, (-new_prob, v, bullets - shooter_count[v]))
 
-    return probability_success[destination_point]
+    return 0.0  # Se não encontrar um caminho
 
 def run():
     input = sys.stdin.read
