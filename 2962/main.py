@@ -68,7 +68,7 @@ def union_find_check(M:int, N:int, sensors:list) -> str:
     bottom = dsu.find(t + 3)
 
     # Se há uma conexão entre extremidades nao da pra roubar
-    if left == bottom  or left == right or top == right or top == bottom:
+    if left == bottom or left == right or top == right or top == bottom:
         return "N"
 
     return "S"
@@ -95,8 +95,6 @@ def run():
             X, Y, S = map(int, data[index].split())
             sensors.append({'x': X, 'y': Y, 'r': S})
             index += 1
-
-        sensors.sort(key=lambda sensor: (sensor['x'], sensor['y']))
 
         vaunion_find_check_value =  union_find_check(M, N, sensors)
 
