@@ -34,7 +34,7 @@ def soldiers_probability_success_bfs(
                     probability_success[neighbor] = neighbor_probability
                     queue.append((neighbor,bullets - 1)) # explora os vizinhos, já que conseguiu diminui balas
 
-    return probability_success[len(probability_success) -1]
+    return probability_success[destination_point]
 
 def run():
     input = sys.stdin.read
