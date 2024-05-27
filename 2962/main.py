@@ -34,21 +34,20 @@ class DisjointSet:
 
 def union_find_check(M:int, N:int, sensors:list) -> str:
     t = len(sensors) # numero dos sensores
-    dsu = DisjointSet(t + 10) # cria nós adicionais
+    dsu = DisjointSet(t + 5) # cria nós adicionais
 
     # verificando os nos com as bordas e une ao nós adicionais
-    for i in range(t):
-        sensor = sensors[i]
+    for i, sensor in enumerate(sensors):
         x, y, r = sensor['x'], sensor['y'], sensor['r']
 
         if x - r <= 0: # esquerda
-            dsu.union(t + 1, i)
+            dsu.union(t, i)
         if y + r >= N: # cima
-            dsu.union(t + 2, i)
+            dsu.union(t + 1, i)
         if x + r >= M: # direita
-            dsu.union(t + 3, i)
+            dsu.union(t + 2, i)
         if y - r <= 0: # baixo
-            dsu.union(t + 4, i)
+            dsu.union(t + 3, i)
 
     # verifica o que sobrepoe no par dos sensores
     for i in range(t):
@@ -63,13 +62,13 @@ def union_find_check(M:int, N:int, sensors:list) -> str:
                 dsu.union(i, j)
 
     # verificando as conexoes nas extremidades
-    a = dsu.find(t + 1)
-    b = dsu.find(t + 2)
-    c = dsu.find(t + 3)
-    d = dsu.find(t + 4)
+    left = dsu.find(t)
+    top = dsu.find(t + 1)
+    right = dsu.find(t + 2)
+    bottom = dsu.find(t + 3)
 
     # Se há uma conexão entre extremidades nao da pra roubar
-    if a == d or a == c or b == c or b == d:
+    if left == bottom  or left == right or top == right or top == bottom:
         return "N"
 
     return "S"
