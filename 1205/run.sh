@@ -1,1 +1,1 @@
-python3 main.py < input.txt
+python3 main.py < udebug_input.txt
