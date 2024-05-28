@@ -1,32 +1,35 @@
 import sys
 
-def floyd_warshall(m:int, n:int, queries:list):
-    MAXC = 26 # alfabeto
 
-    translation_matrix = [[0] * MAXC for _ in range(MAXC)]
+def solve(m: int, n: int, queries: list):
+    MAXC = 26
+
+    f = [[0] * MAXC for _ in range(MAXC)]
     for i in range(MAXC):
-        translation_matrix[i][i] = 1
-    
+        f[i][i] = 1
+
     for _ in range(m):
-        from_char, to_char = queries.pop(0).split()
-        translation_matrix[ord(from_char[0]) - ord('a')][ord(to_char[0]) - ord('a')] = 1
-    
-    # computar o fecho transitivo
+        s1, s2 = queries.pop(0).split()
+        f[ord(s1[0]) - ord('a')][ord(s2[0]) - ord('a')] = 1
+
     for k in range(MAXC):
         for i in range(MAXC):
             for j in range(MAXC):
-                translation_matrix[i][j] |= translation_matrix[i][k] & translation_matrix[k][j]
-    
-    # Verificando se os pares de palavras correspondem após as traduções
+                f[i][j] |= f[i][k] & f[k][j]
+
     results = []
     for _ in range(n):
-        from_char, to_char = queries.pop(0).split()
-        valid = len(from_char) == len(to_char)
-        for i in range(len(from_char)):
-            valid &= translation_matrix[ord(from_char[i]) - ord('a')][ord(to_char[i]) - ord('a')]
+        s1, s2 = queries.pop(0).split()
+        valid = len(s1) == len(s2)
+        for i in range(len(s1)):
+            if i >= len(s2):  # Verifica se o índice está dentro dos limites da segunda palavra
+                valid = False
+                break
+            valid &= f[ord(s1[i]) - ord('a')][ord(s2[i]) - ord('a')]
         results.append("yes" if valid else "no")
-    
+
     return results
+
 
 def run():
     input_data = sys.stdin.read().strip().split('\n')
@@ -35,7 +38,7 @@ def run():
     while index < len(input_data):
         if input_data[index].strip() == '':
             break
-        
+
         # m -> número de traduções de letras
         # n -> número de pares de palavras
         m, n = map(int, input_data[index].split())
@@ -43,11 +46,14 @@ def run():
 
         queries = []
         for _ in range(m + n):
+            if index >= len(input_data):  # Verifica se ainda há linhas disponíveis
+                break
             queries.append(input_data[index])
             index += 1
-        
-        results = floyd_warshall(m=m, n=n, queries=queries)
+
+        results = solve(m=m, n=n, queries=queries)
         print('\n'.join(results))
+
 
 if __name__ == "__main__":
     run()
